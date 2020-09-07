@@ -23,7 +23,7 @@ object CallCenter {
       .load("/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_call_center_details.txt")
 
     //Loading data to dimension table
-    callCenter_df.write.mode("overwrite").jdbc(
+    callCenter_df.write.mode("append").jdbc(
       Utilities.url,
       "DIM_CALL_CENTER",
       Utilities.getDbProps())

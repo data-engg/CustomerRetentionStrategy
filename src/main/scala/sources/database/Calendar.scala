@@ -35,7 +35,7 @@ object Calendar {
         .load("/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_calendar_details.txt")
 
     //Loading data to dimension
-    calendar_df.write.mode("overwrite").jdbc(
+    calendar_df.write.mode("append").jdbc(
       Utilities.url,
       "DIM_CALENDAR",
       Utilities.getDbProps()
