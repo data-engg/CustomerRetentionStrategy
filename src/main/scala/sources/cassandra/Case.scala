@@ -8,7 +8,7 @@ object Case {
 
   def main (args : Array[String]) : Unit = {
 
-    val spark = Utilities.createSparkSession("Calendar dimension warehouse loading")
+    val spark = Utilities.createSparkSession("Moving case data to landing tables")
 
     val schema = new StructType(Array(
       StructField("case_no", IntegerType, false),
