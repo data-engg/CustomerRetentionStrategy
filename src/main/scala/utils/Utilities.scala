@@ -10,6 +10,8 @@ object Utilities {
   def createSparkSession(appName : String): SparkSession = {
 
     SparkSession.builder()
+      .config("spark.cassandra.connection.host","cassandradb.edu.cloudlab.com")
+      .config("spark.cassandra.connection.port",9042)
       .appName(appName)
       .getOrCreate()
 
