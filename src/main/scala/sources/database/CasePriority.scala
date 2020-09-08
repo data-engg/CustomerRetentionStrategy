@@ -1,5 +1,5 @@
 package sources.database
-import org.apache.avro.generic.GenericData
+
 import utils.Utilities
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 
@@ -7,7 +7,7 @@ object CasePriority {
 
   def main (args : Array[String]) : Unit = {
 
-    val spark = Utilities.createSparkSession("Call center dimension warehouse loading")
+    val spark = Utilities.createSparkSession("Case Priority dimension warehouse loading")
 
     val schema = new StructType(Array(
       StructField("Priority_key", StringType, false),
