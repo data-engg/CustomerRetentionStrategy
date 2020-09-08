@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS DIM_CASE_PRIORITY(
 Priority_key VARCHAR(5),
 priority VARCHAR(20),
 severity VARCHAR(100),
-row_insertion_dttm timestamp DEFAULT now(),
+SLA VARCHAR(2),
+row_insertion_dttm timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 CONSTRAINT PK_DIM_CASE_PRIORITY PRIMARY KEY (Priority_key)); 
 
 -- CREATE DIM CASE CATEGORY
