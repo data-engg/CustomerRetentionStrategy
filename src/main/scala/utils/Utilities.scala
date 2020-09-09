@@ -1,7 +1,8 @@
 package utils
 
 import java.util.Properties
-import org.apache.spark.sql.SparkSession
+
+import org.apache.spark.sql.{DataFrame, SparkSession, functions}
 
 object Utilities {
 
@@ -26,6 +27,14 @@ object Utilities {
     props.put("password", "edureka")
 
     return props
+  }
+
+  def loadDB( df : DataFrame , tableName : String ) : Unit = {
+
+    df.write.mode("append").jdbc(
+      url,
+      tableName,
+      getDbProps())
   }
 
 }
