@@ -17,6 +17,7 @@ object CaseDaily {
       .format("org.apache.spark.sql.cassandra")
       .options(Map("keyspace" -> "edureka_735821", "table" -> "case_daily"))
       .load()
+      .drop("row_insertion_dttm")
       .filter( date_format(col("create_timestamp"), "yyyy-MM-dd") === process_date)
 
     Utilities.loadDB(case_df, "CASE_DAILY")
