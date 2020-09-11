@@ -32,10 +32,13 @@ object Case {
       .withColumn("row_insertion_dttm", current_timestamp())
 
     //Loading to landing tables in Cassandra
+
+    Utilities.loadCassandra(case_df, "case_daily")
+    /*
     case_df.write
       .format("org.apache.spark.sql.cassandra")
       .options(Map("keyspace"->"edureka_735821", "table" -> "case_daily"))
-      .save()
+      .save()*/
 
   }
 }

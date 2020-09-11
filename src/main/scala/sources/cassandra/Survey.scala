@@ -29,9 +29,12 @@ object Survey {
       .withColumn("row_insertion_dttm", current_timestamp())
 
     //Loading to landing tables in Cassandra
+
+    Utilities.loadCassandra(survey_df, "case_daily")
+    /*
     survey_df.write
       .format("org.apache.spark.sql.cassandra")
       .options(Map("keyspace"->"edureka_735821", "table" -> "surveys_daily"))
-      .save()
+      .save()*/
   }
 }
