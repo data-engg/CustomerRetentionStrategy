@@ -37,4 +37,13 @@ object Utilities {
       getDbProps())
   }
 
+  def loadCassandra( df : DataFrame, tableName : String) : Unit = {
+
+    df.write
+      .mode("append")
+      .format("org.apache.spark.sql.cassandra")
+      .options(Map("keyspace" -> "edureka_735821", "table" -> tableName))
+      .save()
+  }
+
 }
