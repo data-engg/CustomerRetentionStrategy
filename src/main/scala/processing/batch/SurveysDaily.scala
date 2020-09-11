@@ -3,6 +3,7 @@ package processing
 import utils.Utilities
 import org.apache.spark.sql.functions.{col, date_format, min, max}
 import org.apache.spark.sql.expressions.Window
+
 object SurveysDaily {
 
   def main (args : Array[String]) : Unit = {
