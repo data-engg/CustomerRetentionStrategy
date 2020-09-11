@@ -19,18 +19,9 @@ object Survey {
       StructField("positive_response_range", StringType, false)))
 
     // Reading data from hdfs with correct schema
-    val survey = spark.read
-      .format("csv")
-      .schema(schema)
-      .options(Map("header" -> "true", "sep" -> "\t"))
-      .load("/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_survey_question_details.txt")
+    val survey = Utilities.readDimData(spark, "/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_survey_question_details.txt", schema)
 
     //Loading data to dimension table
-    survey.write.mode("append").jdbc(
-      Utilities.url,
-      "SURVEY_LKP",
-      Utilities.getDbProps())
-
+    Utilities.loadDB(survey, "SURVEY_LKP")
   }
-
 }

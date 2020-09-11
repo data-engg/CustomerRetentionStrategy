@@ -8,6 +8,7 @@ object Calendar {
 
     val spark = Utilities.createSparkSession("Calendar dimension warehouse loading")
 
+    //Defining schema
     val schema = new StructType(Array(
       StructField("calendar_date", DateType, false),
       StructField("date_desc", StringType, false),
@@ -26,21 +27,10 @@ object Calendar {
 
 
       // Reading data from hdfs with correct schema
-      val calendar_df = spark.read
-        .format("csv")
-        .schema(schema)
-        .options(
-          Map("header"->"true", "sep"->"\t")
-        )
-        .load("/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_calendar_details.txt")
+      val calendar_df = Utilities.readDimData(spark, "/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_calendar_details.txt", schema)
 
     //Loading data to dimension
-    calendar_df.write.mode("append").jdbc(
-      Utilities.url,
-      "DIM_CALENDAR",
-      Utilities.getDbProps()
-    )
-
+    Utilities.loadDB(calendar_df, "DIM_CALENDAR")
   }
 
 }

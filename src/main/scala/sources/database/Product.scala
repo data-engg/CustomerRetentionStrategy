@@ -17,17 +17,10 @@ object Product {
       StructField("sub_commodity_desc", StringType, false)))
 
     // Reading data from hdfs with correct schema
-    val product = spark.read
-      .format("csv")
-      .schema(schema)
-      .options(Map("header" -> "true", "sep" -> "\t"))
-      .load("/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_product_details.txt")
+    val product = Utilities.readDimData(spark, "/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_product_details.txt", schema)
 
     //Loading data to dimension table
-    product.write.mode("append").jdbc(
-      Utilities.url,
-      "DIM_PRODUCT",
-      Utilities.getDbProps())
+    Utilities.loadDB(product, "DIM_PRODUCT")s
   }
 
 }

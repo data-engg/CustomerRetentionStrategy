@@ -20,18 +20,10 @@ object Employee {
       StructField("manager", IntegerType, false)))
 
     // Reading data from hdfs with correct schema
-    val employee = spark.read
-      .format("csv")
-      .schema(schema)
-      .options(Map("header" -> "true", "sep" -> "\t"))
-      .load("/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_employee_details.txt")
+    val employee = Utilities.readDimData(spark, "/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_employee_details.txt", schema)
 
     //Loading data to dimension table
-    employee.write.mode("append").jdbc(
-      Utilities.url,
-      "DIM_EMPLOYEE",
-      Utilities.getDbProps())
-
+    Utilities.loadDB(employee, "DIM_EMPLOYEE")
   }
 
 }
