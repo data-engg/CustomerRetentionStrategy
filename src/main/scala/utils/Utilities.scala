@@ -2,7 +2,8 @@ package utils
 
 import java.util.Properties
 
-import org.apache.spark.sql.{DataFrame, SparkSession, functions}
+import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.types.StructType
 
 object Utilities {
 
@@ -27,6 +28,13 @@ object Utilities {
     props.put("password", "edureka")
 
     return props
+  }
+
+  def readDimData (sparkSession: SparkSession, hdfsLoc : String, schema : StructType) : DataFrame = {
+    sparkSession.read.format("csv")
+      .schema(schema)
+      .options(Map("header"->"true", "sep"->"\t"))
+      .load(hdfsLoc)
   }
 
   def loadDB( df : DataFrame , tableName : String ) : Unit = {
