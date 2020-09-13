@@ -45,7 +45,7 @@ category_description VARCHAR(50),
 sub_category_description VARCHAR(50),
 priority VARCHAR(5),
 row_insertion_dttm timestamp DEFAULT now(),
-CONSTRAINT PK_DIM_CASE_CATEGORY PRIMARY KEY (category_key),
+CONSTRAINT PK_DIM_CASE_CATEGORY PRIMARY KEY (category_key, sub_category_key),
 CONSTRAINT FK_PRIORITY FOREIGN KEY (priority) REFERENCES DIM_CASE_PRIORITY(Priority_key) ON UPDATE CASCADE ON DELETE RESTRICT);
 
 -- CREATE DIM CASE COUNTRY
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS DIM_CASE_COUNTRY(
 id int,
 Name VARCHAR(75),
 Alpha_2 VARCHAR(2),
-Alpha_3 VARCHAR(2),
+Alpha_3 VARCHAR(3),
 row_insertion_dttm timestamp DEFAULT now(),
 CONSTRAINT PK_DIM_CASE_CATEGORY PRIMARY KEY (id));
 
