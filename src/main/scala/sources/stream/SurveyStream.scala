@@ -73,14 +73,14 @@ object SurveyStream {
     while (iter.hasNext()){
       val json_obj = iter.next().asInstanceOf[JSONObject]
       ret_arr.append(
-        json_obj.get("survey_id").toString + "," +
-          json_obj.get("case_no").toString + "," +
-          json_obj.get("survey_timestamp").toString + "," +
-          json_obj.get("q1").toString + "," +
-          json_obj.get("q2").toString + "," +
-          json_obj.get("q3").toString + "," +
-          json_obj.get("q4").toString + "," +
-          json_obj.get("q5").toString)
+        json_obj.get("survey_id").toString() + "," +
+          json_obj.get("case_no").toString() + "," +
+          json_obj.get("survey_timestamp").toString() + "," +
+          json_obj.get("Q1").toString() + "," +
+          json_obj.get("Q2").toString() + "," +
+          json_obj.get("Q3").toString() + "," +
+          json_obj.get("Q4").toString() + "," +
+          json_obj.get("Q5").toString())
     }
     ret_arr.toArray[String]
   }
