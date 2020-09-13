@@ -30,7 +30,7 @@ object Survey {
 
     //Loading to landing tables in Cassandra
 
-    Utilities.loadCassandra(survey_df, "case_daily")
+    Utilities.loadCassandra(survey_df, "survey_daily")
     /*
     survey_df.write
       .format("org.apache.spark.sql.cassandra")
