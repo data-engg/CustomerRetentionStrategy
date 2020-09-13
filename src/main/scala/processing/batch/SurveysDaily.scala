@@ -1,5 +1,4 @@
-package processing
-
+package processing.batch
 import utils.Utilities
 import org.apache.spark.sql.functions.{col, date_format, min, max}
 import org.apache.spark.sql.expressions.Window
@@ -8,7 +7,17 @@ object SurveysDaily {
 
   def main (args : Array[String]) : Unit = {
 
-    val spark = Utilities.createSparkSession("Daily survey landing to main processing")
+    if (args.length > 0){
+      if (args(0) != "surveys_daily" && args(0) != "surveys_realtime"){
+        println("Valid table names are : surveys_daily and surveys_realtime. Please use either of them")
+        System.exit(1)
+      }
+    } else {
+      println("Enter the table name from where data is to be moved")
+      System.exit(1)
+
+
+      val spark = Utilities.createSparkSession("Daily survey landing to main processing")
 
     //Processing date
     val process_date = "2020-04-20"
