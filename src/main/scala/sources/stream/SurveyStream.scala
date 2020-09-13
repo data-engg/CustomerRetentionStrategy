@@ -56,6 +56,14 @@ object SurveyStream {
           println("Empty rdd.... Skipping execution...")
         }
       })
+
+
+    try{
+      ssc.start()
+      ssc.awaitTermination()
+    } finally {
+      ssc.stop()
+    }
   }
 
   def stringToArray (json_string : String) : Array[String] = {
