@@ -15,6 +15,7 @@ object SurveysDaily {
     } else {
       println("Enter the table name from where data is to be moved")
       System.exit(1)
+    }
 
 
       val spark = Utilities.createSparkSession("Daily survey landing to main processing")
