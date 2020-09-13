@@ -1,4 +1,4 @@
-package processing.stream
+package sources.stream
 
 import org.apache.spark.sql.functions.{col, explode, split, current_timestamp}
 import org.apache.spark.sql.types.IntegerType
