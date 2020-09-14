@@ -1,9 +1,10 @@
 package utils
 
 import java.util.Properties
-
+import connection._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.types.StructType
+import java.sql.{CallableStatement,SQLException}
 
 object Utilities {
 
@@ -43,6 +44,28 @@ object Utilities {
       url,
       tableName,
       getDbProps())
+
+    updateLastModified(tableName)
+  }
+
+  def updateLastModified (tableName : String): Unit ={
+
+    //Defining query
+    val query : String = "{CALL UPDATE_LAST_MODIFIED_DATE(?)}"
+    //Creating a statement from query
+    val stmt : CallableStatement = MySql.getConn().prepareCall(query)
+    //Setting parameter
+    stmt.setString("TAB_NAME", tableName)
+    //executing query
+    try{
+      stmt.executeQuery()
+    } catch {
+      case (e : SQLException) => {
+        println("Updating last modified table caught exception.... Skipping updating last modified table")
+      }
+    }
+
+
   }
 
   def loadCassandra( df : DataFrame, tableName : String) : Unit = {
