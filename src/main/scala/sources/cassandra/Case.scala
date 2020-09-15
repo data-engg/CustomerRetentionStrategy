@@ -43,7 +43,7 @@ object Case {
     Utilities.loadCassandra(case_df, "case_daily")
 
     //Updating last modified
-    Utilities.updateLastModifiedCassandra(case_df.select("row_insertion_dttm"), "CASE_DAILY")
+    //Utilities.updateLastModifiedCassandra(case_df.select("row_insertion_dttm"), "CASE_DAILY")
 
     case_df.unpersist()
   }

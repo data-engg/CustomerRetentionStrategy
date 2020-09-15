@@ -39,6 +39,6 @@ object Survey {
     Utilities.loadCassandra(survey_df, "surveys_daily")
 
     //Updating last modified
-    Utilities.updateLastModifiedCassandra(survey_df.select("row_insertion_dttm"), "SURVEYS_DAILY")
+    //Utilities.updateLastModifiedCassandra(survey_df.select("row_insertion_dttm"), "SURVEYS_DAILY")
   }
 }
