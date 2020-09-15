@@ -8,6 +8,11 @@ object Survey {
 
   def main (args : Array[String]) : Unit = {
 
+    if (args.length < 1){
+      println("Enter input file path... Aboting execution")
+      System.exit(1)
+    }
+
     val spark = Utilities.createSparkSession("Moving survey data to landing tables")
 
     val schema = new StructType(Array(
@@ -25,16 +30,11 @@ object Survey {
       .format("csv")
       .schema(schema)
       .options(Map("header"->"true", "sep"->"\t"))
-      .load("/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_case_survey_details.txt")
+      .load(args(0))
       .withColumn("row_insertion_dttm", current_timestamp())
 
     //Loading to landing tables in Cassandra
 
     Utilities.loadCassandra(survey_df, "surveys_daily")
-    /*
-    survey_df.write
-      .format("org.apache.spark.sql.cassandra")
-      .options(Map("keyspace"->"edureka_735821", "table" -> "surveys_daily"))
-      .save()*/
   }
 }

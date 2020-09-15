@@ -1,12 +1,18 @@
 package sources.cassandra
 
+import org.apache.spark.sql.DataFrame
 import utils.Utilities
-import org.apache.spark.sql.types.{StructType, StructField, StringType, IntegerType}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.functions.current_timestamp
 
 object Case {
 
   def main (args : Array[String]) : Unit = {
+
+    if (args.length < 1){
+      println("Enter input file path... Aboting execution")
+      System.exit(1)
+    }
 
     val spark = Utilities.createSparkSession("Moving case data to landing tables")
 
@@ -28,17 +34,11 @@ object Case {
       .format("csv")
       .schema(schema)
       .options(Map("header"->"true", "sep"->"\t"))
-      .load("/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_case_details.txt")
+      .load(args(0))
       .withColumn("row_insertion_dttm", current_timestamp())
 
     //Loading to landing tables in Cassandra
 
     Utilities.loadCassandra(case_df, "case_daily")
-    /*
-    case_df.write
-      .format("org.apache.spark.sql.cassandra")
-      .options(Map("keyspace"->"edureka_735821", "table" -> "case_daily"))
-      .save()*/
-
   }
 }
