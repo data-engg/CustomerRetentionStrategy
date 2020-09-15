@@ -4,11 +4,15 @@ import java.util.Properties
 import connection._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.types.StructType
-import java.sql.{CallableStatement,SQLException}
+import java.sql.{CallableStatement,SQLException, Timestamp}
 
 object Utilities {
 
-  val url : String = "jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database"
+    private val url : String = "jdbc:mysql://dbserver.edu.cloudlab.com/labuser_database"
+
+  def getURL() : String = {
+    url
+  }
 
   def createSparkSession(appName : String): SparkSession = {
 
@@ -64,8 +68,6 @@ object Utilities {
         println("Updating last modified table caught exception.... Skipping updating last modified table")
       }
     }
-
-
   }
 
   def loadCassandra( df : DataFrame, tableName : String) : Unit = {
@@ -75,6 +77,24 @@ object Utilities {
       .format("org.apache.spark.sql.cassandra")
       .options(Map("keyspace" -> "edureka_735821", "table" -> tableName))
       .save()
+  }
+
+  def readCassndraTables(sparkSession: SparkSession, table : String) : DataFrame = {
+    sparkSession.read
+      .format("org.apache.spark.sql.cassandra")
+      .options(Map("keyspace" -> "edureka_735821", "table"-> table))
+      .load()
+  }
+
+  def getLastModified( sparkSession: SparkSession, table : String) : Timestamp = {
+
+    val tableName = table.toUpperCase() + "_LAST_MODIFIED"
+
+    sparkSession.read
+      .jdbc(url, tableName, getDbProps())
+      .select("LAST_MODIFIED_TS")
+      .head()
+      .getTimestamp(0)
   }
 
 }
