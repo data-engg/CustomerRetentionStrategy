@@ -55,7 +55,7 @@ object SurveysDaily {
 
     //Reading records from table
     val survey_db_df = spark.read
-      .jdbc( Utilities.url, "FACT_SURVEY", Utilities.getDbProps())
+      .jdbc( Utilities.getURL(), "FACT_SURVEY", Utilities.getDbProps())
       .select("case_no")
 
     // Collecting only the new surveys
