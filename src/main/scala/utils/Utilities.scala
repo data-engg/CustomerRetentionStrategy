@@ -77,6 +77,8 @@ object Utilities {
       .format("org.apache.spark.sql.cassandra")
       .options(Map("keyspace" -> "edureka_735821", "table" -> tableName))
       .save()
+
+    updateLastModified(tableName)
   }
 
   def readCassndraTables(sparkSession: SparkSession, table : String) : DataFrame = {
