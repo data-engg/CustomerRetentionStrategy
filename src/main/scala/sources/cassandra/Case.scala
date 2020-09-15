@@ -3,7 +3,7 @@ package sources.cassandra
 import org.apache.spark.sql.DataFrame
 import utils.Utilities
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
-import org.apache.spark.sql.functions.current_timestamp
+import org.apache.spark.sql.functions.{current_timestamp, max, col, to_date}
 
 object Case {
 
@@ -37,8 +37,14 @@ object Case {
       .load(args(0))
       .withColumn("row_insertion_dttm", current_timestamp())
 
-    //Loading to landing tables in Cassandra
+    case_df.persist(org.apache.spark.storage.StorageLevel.DISK_ONLY)
 
+    //Loading to landing tables in Cassandra
     Utilities.loadCassandra(case_df, "case_daily")
+
+    //Updating last modified
+    Utilities.updateLastModifiedCassandra(case_df.select("row_insertion_dttm"), "CASE_DAILY")
+
+    case_df.unpersist()
   }
 }

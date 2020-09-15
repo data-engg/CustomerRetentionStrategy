@@ -1,10 +1,13 @@
 package utils
 
 import java.util.Properties
+
 import connection._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.types.StructType
-import java.sql.{CallableStatement,SQLException, Timestamp}
+import java.sql.{CallableStatement, SQLException, Timestamp}
+
+import org.apache.spark.sql.functions.{col, max, to_date}
 
 object Utilities {
 
@@ -77,9 +80,17 @@ object Utilities {
       .format("org.apache.spark.sql.cassandra")
       .options(Map("keyspace" -> "edureka_735821", "table" -> tableName))
       .save()
-
-    updateLastModified(tableName)
   }
+
+  def updateLastModifiedCassandra(df : DataFrame, tableName : String) : Unit = {
+
+    df.select( max("row_insertion_dttm").as("LAST_MODIFIED_TS"))
+      .select(to_date(col("LAST_MODIFIED_TS")).as("LAST_MODIFIED_DATE"), col("LAST_MODIFIED_TS"))
+      .write
+      .mode(org.apache.spark.sql.SaveMode.Overwrite)
+      .jdbc(getURL(), tableName.toUpperCase + "_LAST_MODIFIED", getDbProps())
+  }
+
 
   def readCassndraTables(sparkSession: SparkSession, table : String) : DataFrame = {
     sparkSession.read

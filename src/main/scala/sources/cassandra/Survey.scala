@@ -33,8 +33,12 @@ object Survey {
       .load(args(0))
       .withColumn("row_insertion_dttm", current_timestamp())
 
-    //Loading to landing tables in Cassandra
+    survey_df.persist(org.apache.spark.storage.StorageLevel.DISK_ONLY)
 
+    //Loading to landing tables in Cassandra
     Utilities.loadCassandra(survey_df, "surveys_daily")
+
+    //Updating last modified
+    Utilities.updateLastModifiedCassandra(survey_df.select("row_insertion_dttm"), "SURVEYS_DAILY")
   }
 }
