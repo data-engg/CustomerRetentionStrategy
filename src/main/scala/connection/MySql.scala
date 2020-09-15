@@ -7,7 +7,7 @@ object MySql {
 
   def getConn() : Connection = {
 
-    val conn = DriverManager.getConnection(Utilities.url, Utilities.getDbProps())
+    val conn = DriverManager.getConnection(Utilities.getURL(), Utilities.getDbProps())
 
     conn
   }
