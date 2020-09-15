@@ -13,7 +13,7 @@ object LandingToFact {
       println("Enter the name of cassandra table.... Aborting job execution")
       System.exit(1)
     } else {
-      if (validTables.contains(args(0).toLowerCase)){
+      if ( ! validTables.contains(args(0).toLowerCase)){
         println("Enter valid table names.... Valid table names are 'CASE_REALTIME' and 'CASE_DAILY' ")
         System.exit(1)
       }
