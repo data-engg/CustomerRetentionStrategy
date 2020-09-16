@@ -1,9 +1,9 @@
 package processing.batch
 import utils.Utilities
-import org.apache.spark.sql.functions.{col, date_format, min, max}
+import org.apache.spark.sql.functions.{col, max, min, to_date}
 import org.apache.spark.sql.expressions.Window
 
-object SurveysDaily {
+object SurveysDailyRealtime {
 
   def main (args : Array[String]) : Unit = {
 
@@ -20,16 +20,14 @@ object SurveysDaily {
 
       val spark = Utilities.createSparkSession("Daily survey landing to main processing")
 
-    //Processing date
-    val process_date = "2020-04-20"
+    //Getting last processed time stamp of surveys_daily/surveys_realtime
+    val lastProcessedTS = Utilities.getLastModified(spark, args(0))
 
     // Reading data from cassandra tables
-    val survey_df = spark.read
-      .format("org.apache.spark.sql.cassandra")
-      .options(Map("keyspace" -> "edureka_735821", "table" -> "surveys_daily"))
-      .load()
-      .drop("row_insertion_dttm")
-      .filter( date_format(col("survey_timestamp"), "yyyy-MM-dd") === process_date)
+    val survey_df = Utilities.readCassndraTables(spark, args(0))
+      .filter( col("row_insertion_dttm") > lastProcessedTS)
+      .persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
+
 
     //calculating earliest timestamp per case
     val case_earliest = survey_df
@@ -63,8 +61,19 @@ object SurveysDaily {
       .join(survey_db_df, surveys_deduped.col("case_no") === survey_db_df.col("case_no"), "left_outer")
       .filter( survey_db_df.col("case_no").isNull )
       .drop(survey_db_df.col("case_no"))
+      .drop("row_insertion_dttm")
 
+    //Load fresh cases to FACT_SURVEY
     Utilities.loadDB(fresh_survery, "FACT_SURVEY")
+
+    //Updating last modified timestamp
+    val ts_update_df = survey_df
+      .select(max("row_insertion_dttm").as("LAST_MODIFIED_TS"))
+      .select(to_date(col("LAST_MODIFIED_TS")).as("LAST_MODIFIED_DATE"), col("LAST_MODIFIED_TS"))
+
+    ts_update_df.write
+      .mode(org.apache.spark.sql.SaveMode.Overwrite)
+      .jdbc(Utilities.getURL, "FACT_SURVEY_LAST_MODIFIED", Utilities.getDbProps())
 
   }
 
