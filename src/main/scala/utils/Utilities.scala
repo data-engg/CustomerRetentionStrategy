@@ -19,11 +19,29 @@ object Utilities {
 
   def createSparkSession(appName : String): SparkSession = {
 
-    SparkSession.builder()
+    val spark = SparkSession.builder()
+      .config("spark.cassandra.connection.host","cassandradb.edu.cloudlab.com")
+      .config("spark.cassandra.connection.port",9042)
+      .appName(appName)
+      .enableHiveSupport()
+      .getOrCreate()
+
+    spark
+  }
+
+
+  def createSparkSessionWitHiveSupport(appName : String): SparkSession = {
+
+    val spark = SparkSession.builder()
       .config("spark.cassandra.connection.host","cassandradb.edu.cloudlab.com")
       .config("spark.cassandra.connection.port",9042)
       .appName(appName)
       .getOrCreate()
+
+    spark.sqlContext.setConf("hive.exec.dynamic.partition","true")
+    spark.sqlContext.setConf("hive.exec.dynamic.partition.mode","nonstrict")
+
+    spark
 
   }
 
@@ -48,11 +66,15 @@ object Utilities {
   def loadDB( df : DataFrame , tableName : String ) : Unit = {
 
     df.write.mode("append").jdbc(
-      url,
+      getURL(),
       tableName,
       getDbProps())
 
     updateLastModified(tableName)
+  }
+
+  def readDB (sparkSession: SparkSession, tableName: String) : DataFrame ={
+    sparkSession.read.jdbc(getURL(), tableName, getDbProps())
   }
 
   def updateLastModified (tableName : String): Unit ={
@@ -73,6 +95,25 @@ object Utilities {
     }
   }
 
+  def updateLastModifiedT2 (baseTable : String, targetTable : String): Unit = {
+
+    val query : String = "{CALL UPDATE_LAST_MODIFIED_DATE_T2(?)}"
+    val stmt : CallableStatement = MySql.getConn().prepareCall(query)
+
+    //Setting parameter
+    stmt.setString("BASE_TABLE", baseTable)
+    stmt.setString("TARGET_TABLE", targetTable)
+
+    try{
+      stmt.executeQuery()
+    } catch {
+      case (e : SQLException) => {
+        println("Updating last modified table caught exception.... Skipping updating last modified table")
+      }
+    }
+
+  }
+
   def loadCassandra( df : DataFrame, tableName : String) : Unit = {
 
     df.write
@@ -90,7 +131,6 @@ object Utilities {
       .mode(org.apache.spark.sql.SaveMode.Overwrite)
       .jdbc(getURL(), tableName.toUpperCase + "_LAST_MODIFIED", getDbProps())
   }
-
 
   def readCassndraTables(sparkSession: SparkSession, table : String) : DataFrame = {
     sparkSession.read
@@ -110,4 +150,12 @@ object Utilities {
       .getTimestamp(0)
   }
 
+  def loadHive(df: DataFrame, hiveTable : String): Unit ={
+    df
+      .coalesce(1)
+      .write
+      .mode(org.apache.spark.sql.SaveMode.Append)
+      .format("orc")
+      .insertInto(hiveTable.toLowerCase)
+  }
 }
