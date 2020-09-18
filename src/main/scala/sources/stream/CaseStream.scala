@@ -1,3 +1,13 @@
+/*
+  This spark application polls kafka topic and ingest it into cassandra tables after flattening.
+  Usage guidelines:
+  spark2-submit --class sources.stream.CaseStream \
+--packages com.datastax.spark:spark-cassandra-connector_2.11:2.0.12,org.apache.spark:spark-streaming-kafka-0-8_2.11:2.2.0,org.apache.kafka:kafka-clients:0.8.2.2,org.apache.clerezza.ext:org.json.simple:0.4 \
+--conf spark.cassandra.auth.username=..... \
+--conf spark.cassandra.auth.password=..... \
+target/scala-2.11/customer-retention-strategy_2.11-0.1.jar case_topic
+ */
+
 package sources.stream
 
 import utils.Utilities
@@ -13,16 +23,21 @@ object CaseStream {
 
   def main (args : Array[String]) : Unit = {
 
+    if (args.length < 1){
+      println("Enter Kafka topic to be polled.... Skipping argument.....")
+      System.exit(1)
+    }
+
     //Configuring context
     val spark = Utilities.createSparkSession("Stream ingestion of cases to landing area")
     spark.sparkContext.setLogLevel("ERROR")
-    val ssc = new StreamingContext(spark.sparkContext, Seconds(10))
+    val ssc = new StreamingContext(spark.sparkContext, Seconds(15))
 
     //Creation of stream from Kafka topic
     val stream = KafkaUtils.createStream(ssc,
       "ip-20-0-21-196.ec2.internal:2181",                       //Bootstrap servers
-      "case_ingestion_group",                                          //group id
-      Map("case_735821" -> 1))                                             //consumers per topic
+      "case_ingestion_group",                                     //group id
+      Map(args(0) -> 1))                                                    //consumers per topic
 
     //Processing of Stream
     import spark.implicits._
