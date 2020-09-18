@@ -1,18 +1,27 @@
+/*
+This code data from hdfs to landing tables. Usage guidelines:
+  Case 1: with default source and targets
+  spark2-submit --class sources.cassandra.Case \
+  --packages mysql:mysql-connector-java:5.1.49 \
+  --target/scala-2.11/customer-retention-strategy_2.11-0.1.jar
+
+Case 2: Change source file location
+  spark2-submit --class sources.cassandra.Case \
+  --packages mysql:mysql-connector-java:5.1.49 \
+  --target/scala-2.11/customer-retention-strategy_2.11-0.1.jar <input hdfs>
+    */
+
 package sources.cassandra
 
-import org.apache.spark.sql.DataFrame
 import utils.Utilities
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
-import org.apache.spark.sql.functions.{current_timestamp, max, col, to_date}
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.spark.sql.functions.current_timestamp
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object Case {
 
   def main (args : Array[String]) : Unit = {
-
-    if (args.length < 1){
-      println("Enter input file path... Aboting execution")
-      System.exit(1)
-    }
 
     val spark = Utilities.createSparkSession("Moving case data to landing tables")
 
@@ -29,13 +38,19 @@ object Case {
       StructField("country_cd", StringType, false),
       StructField("product_code", IntegerType, false)))
 
+    //Defining a file system
+    val fs : FileSystem = FileSystem.get(spark.sparkContext.hadoopConfiguration)
+
+    var case_df : DataFrame = null
+
     // Reading data from hdfs with correct schema
-    val case_df = spark.read
-      .format("csv")
-      .schema(schema)
-      .options(Map("header"->"true", "sep"->"\t"))
-      .load(args(0))
-      .withColumn("row_insertion_dttm", current_timestamp())
+    if (fs.exists(new Path(args(0)))){
+      case_df = readData(spark, args(0), schema)
+        .withColumn("row_insertion_dttm", current_timestamp())
+    } else {
+      case_df = readData(session = spark, schm = schema)
+        .withColumn("row_insertion_dttm", current_timestamp())
+    }
 
     case_df.persist(org.apache.spark.storage.StorageLevel.DISK_ONLY)
 
@@ -43,8 +58,15 @@ object Case {
     Utilities.loadCassandra(case_df, "case_daily")
 
     //Updating last modified
-    //Utilities.updateLastModifiedCassandra(case_df.select("row_insertion_dttm"), "CASE_DAILY")
+    Utilities.updateLastModifiedCassandra(case_df.select("row_insertion_dttm"), "CASE_DAILY")
 
     case_df.unpersist()
+  }
+
+  def readData( session : SparkSession,
+                hdfsLoc : String = "/bigdatapgp/common_folder/project_futurecart/batchdata/futurecart_case_details.txt",
+                schm : StructType) : DataFrame = {
+
+    Utilities.readDimData(session, hdfsLoc, schm)
   }
 }
