@@ -1,33 +1,43 @@
+/*
+ This spark app incrementally loads survey data from landing tables to warehouse.
+ Data from both streaming and batch source is assimilated and then loaded.
+
+ Usage guidelines:
+ spark2-submit --class processing.batch.LandingToFactSurveys \
+  --packages com.datastax.spark:spark-cassandra-connector_2.11:2.0.12,mysql:mysql-connector-java:5.1.49
+  --conf spark.cassandra.auth.username=..... \
+  --conf spark.cassandra.auth.password=..... \
+  target/scala-2.11/customer-retention-strategy_2.11-0.1.jar
+ */
 package processing.batch
 import utils.Utilities
 import org.apache.spark.sql.functions.{col, max, min, to_date}
 import org.apache.spark.sql.expressions.Window
 
-object SurveysDailyRealtime {
+object LandingToFactSurveys {
 
   def main (args : Array[String]) : Unit = {
 
-    if (args.length > 0){
-      if (args(0) != "surveys_daily" && args(0) != "surveys_realtime"){
-        println("Valid table names are : surveys_daily and surveys_realtime. Please use either of them")
-        System.exit(1)
-      }
-    } else {
-      println("Enter the table name from where data is to be moved")
-      System.exit(1)
-    }
+    val spark = Utilities.createSparkSession("Daily survey landing to main processing")
 
-
-      val spark = Utilities.createSparkSession("Daily survey landing to main processing")
-
-    //Getting last processed time stamp of surveys_daily/surveys_realtime
-    val lastProcessedTS = Utilities.getLastModified(spark, args(0))
+    //Getting last processed time stamp of surveys_daily
+    var lastProcessedTS = Utilities.getLastModified(spark, "surveys_daily")
 
     // Reading data from cassandra tables
-    val survey_df = Utilities.readCassndraTables(spark, args(0))
+    val df_daily =  Utilities.readCassndraTables(spark, "surveys_daily")
       .filter( col("row_insertion_dttm") > lastProcessedTS)
       .persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
 
+    //Getting last processed time stamp of surveys_realtime
+    lastProcessedTS = Utilities.getLastModified(spark, "surveys_realtime")
+
+    // Reading data from cassandra tables
+    val df_realtime =  Utilities.readCassndraTables(spark, "surveys_realtime")
+      .filter( col("row_insertion_dttm") > lastProcessedTS)
+      .persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
+
+    // Accumulating both surveys and realtime data
+    val survey_df = df_daily.union(df_realtime)
 
     //calculating earliest timestamp per case
     val case_earliest = survey_df
@@ -40,7 +50,7 @@ object SurveysDailyRealtime {
       .join(case_earliest, survey_df.col("case_no") === case_earliest.col("case_no"), "inner")
       .drop(survey_df.col("case_no")).where("survey_timestamp =  earliest_ts").drop("earliest_ts")
 
-    //deduping surverys
+    //deduping surveys
     val windowSpec = Window.partitionBy("case_no")
 
     val surveys_deduped = surveys_earliest
@@ -67,13 +77,25 @@ object SurveysDailyRealtime {
     Utilities.loadDB(fresh_survery, "FACT_SURVEY")
 
     //Updating last modified timestamp
-    val ts_update_df = survey_df
+    val ts_update_df_daily = df_daily
       .select(max("row_insertion_dttm").as("LAST_MODIFIED_TS"))
       .select(to_date(col("LAST_MODIFIED_TS")).as("LAST_MODIFIED_DATE"), col("LAST_MODIFIED_TS"))
 
-    ts_update_df.write
+    ts_update_df_daily.write
       .mode(org.apache.spark.sql.SaveMode.Overwrite)
-      .jdbc(Utilities.getURL, "FACT_SURVEY_LAST_MODIFIED", Utilities.getDbProps())
+      .jdbc(Utilities.getURL, "SURVEYS_DAILY_LAST_MODIFIED", Utilities.getDbProps())
+
+    df_daily.unpersist()
+
+    val ts_update_df_realtime = df_realtime
+      .select(max("row_insertion_dttm").as("LAST_MODIFIED_TS"))
+      .select(to_date(col("LAST_MODIFIED_TS")).as("LAST_MODIFIED_DATE"), col("LAST_MODIFIED_TS"))
+
+    ts_update_df_realtime.write
+      .mode(org.apache.spark.sql.SaveMode.Overwrite)
+      .jdbc(Utilities.getURL, "SURVEYS_DAILY_LAST_MODIFIED", Utilities.getDbProps())
+
+    ts_update_df_realtime.unpersist()
 
   }
 
