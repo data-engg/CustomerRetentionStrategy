@@ -2,12 +2,16 @@
 This code data from hdfs to landing tables. Usage guidelines:
   Case 1: with default source and targets
   spark2-submit --class sources.cassandra.Case \
-  --packages mysql:mysql-connector-java:5.1.49 \
+  --packages mysql:mysql-connector-java:5.1.49,com.datastax.spark:spark-cassandra-connector_2.11:2.0.12 \
+  --conf spark.cassandra.auth.username=..... \
+  --conf spark.cassandra.auth.password=..... \
   --target/scala-2.11/customer-retention-strategy_2.11-0.1.jar
 
 Case 2: Change source file location
   spark2-submit --class sources.cassandra.Case \
-  --packages mysql:mysql-connector-java:5.1.49 \
+  --packages mysql:mysql-connector-java:5.1.49,com.datastax.spark:spark-cassandra-connector_2.11:2.0.12 \
+  --conf spark.cassandra.auth.username=..... \
+  --conf spark.cassandra.auth.password=..... \
   --target/scala-2.11/customer-retention-strategy_2.11-0.1.jar <input hdfs>
     */
 
@@ -55,10 +59,10 @@ object Case {
     case_df.persist(org.apache.spark.storage.StorageLevel.DISK_ONLY)
 
     //Loading to landing tables in Cassandra
-    Utilities.loadCassandra(case_df, "case_daily")
+    Utilities.loadCassandra(case_df, "edureka_735821_futurecart_case_daily")
 
     //Updating last modified
-    Utilities.updateLastModifiedCassandra(case_df.select("row_insertion_dttm"), "CASE_DAILY")
+    Utilities.updateLastModifiedCassandra(case_df.select("row_insertion_dttm"), "edureka_735821_futurecart_case_daily")
 
     case_df.unpersist()
   }

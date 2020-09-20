@@ -69,7 +69,7 @@ object CaseStream {
             .withColumn("row_insertion_dttm", current_timestamp)
 
           //Loading rows to landing tables
-          Utilities.loadCassandra(json_col_df, "case_realtime" )
+          Utilities.loadCassandra(json_col_df, "edureka_735821_futurecart_case_realtime" )
       }
         else {
           println("Empty rdd.... Skipping execution...")

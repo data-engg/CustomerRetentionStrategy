@@ -3,18 +3,17 @@
   Case 1: with default source and targets
   spark2-submit --class sources.database.Employee \
   --packages mysql:mysql-connector-java:5.1.49 \
-  --target/scala-2.11/customer-retention-strategy_2.11-0.1.jar
+  target/scala-2.11/customer-retention-strategy_2.11-0.1.jar
 
   Case 2: Change source file location
   spark2-submit --class sources.database.Employee \
   --packages mysql:mysql-connector-java:5.1.49 \
-  --target/scala-2.11/customer-retention-strategy_2.11-0.1.jar <input hdfs>
+  target/scala-2.11/customer-retention-strategy_2.11-0.1.jar <input hdfs>
 
   Case 3: Change both source file and target tables
-
   spark2-submit --class sources.database.Employee \
   --packages mysql:mysql-connector-java:5.1.49 \
-  --target/scala-2.11/customer-retention-strategy_2.11-0.1.jar <input hdfs> <target tables>
+  target/scala-2.11/customer-retention-strategy_2.11-0.1.jar <input hdfs> <target tables>
  */
 
 package sources.database
@@ -72,7 +71,7 @@ object Employee {
   }
   /*Function to load data from to RDBMS.
     This makes it possible to load to default table as well as change target table just by adding an argument at run time*/
-  def loadData( df : DataFrame, tableName : String = "DIM_EMPLOYEE") = {
+  def loadData( df : DataFrame, tableName : String = "EDUREKA_735821_FUTURECART_EMPLOYEE_DETAILS") = {
     Utilities.loadDB(df, tableName)
   }
 
