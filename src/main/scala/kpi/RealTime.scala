@@ -97,7 +97,7 @@ object RealTime {
         load_df.show(false)
 
         //Load data to cassandra table
-        Utilities.loadCassandra(load_df, "crm_kpi_realtime")
+        Utilities.loadCassandra(load_df, "edureka_735821_futurecart_crm_kpi_realtime")
 
         println("....... End of RDD batch execution ......")
 
