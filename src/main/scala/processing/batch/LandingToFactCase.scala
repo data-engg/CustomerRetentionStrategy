@@ -21,18 +21,18 @@ object LandingToFactCase {
     val spark = Utilities.createSparkSession("Incremental loading from landing tables(cassandra) to fact tables(mysql)")
 
     //Getting processed time stamp of case_daily
-    var lastProcessedTS = Utilities.getLastModified(spark, "case_daily")
+    var lastProcessedTS = Utilities.getLastModified(spark, "edureka_735821_futurecart_case_daily")
 
     //Taking records which are inserted after last processed time
-    val df_daily = Utilities.readCassndraTables(spark, "case_daily").filter( col("row_insertion_dttm") > lastProcessedTS)
+    val df_daily = Utilities.readCassndraTables(spark, "edureka_735821_futurecart_case_daily").filter( col("row_insertion_dttm") > lastProcessedTS)
       .persist(org.apache.spark.storage.StorageLevel.DISK_ONLY)
 
 
     //Getting processed time stamp of case_realtime
-    lastProcessedTS = Utilities.getLastModified(spark, "case_realtime")
+    lastProcessedTS = Utilities.getLastModified(spark, "edureka_735821_futurecart_case_realtime")
 
     //Taking records which are inserted after last processed time
-    val df_realtime = Utilities.readCassndraTables(spark, "case_realtime").filter( col("row_insertion_dttm") > lastProcessedTS)
+    val df_realtime = Utilities.readCassndraTables(spark, "edureka_735821_futurecart_case_realtime").filter( col("row_insertion_dttm") > lastProcessedTS)
       .persist(org.apache.spark.storage.StorageLevel.DISK_ONLY)
 
 
@@ -50,7 +50,7 @@ object LandingToFactCase {
 
     ts_update_df_daily.write
       .mode(org.apache.spark.sql.SaveMode.Overwrite)
-      .jdbc(Utilities.getURL, "CASE_DAILY_LAST_MODIFIED", Utilities.getDbProps())
+      .jdbc(Utilities.getURL, "EDUREKA_735821_FUTURECART_CASE_DAILY_LAST_MODIFIED", Utilities.getDbProps())
 
     df_daily.unpersist()
 
@@ -60,7 +60,7 @@ object LandingToFactCase {
 
     ts_update_df_realtime.write
       .mode(org.apache.spark.sql.SaveMode.Overwrite)
-      .jdbc(Utilities.getURL, "CASE_REALTIME_LAST_MODIFIED", Utilities.getDbProps())
+      .jdbc(Utilities.getURL, "EDUREKA_735821_FUTURECART_CASE_REALTIME_LAST_MODIFIED", Utilities.getDbProps())
 
     df_realtime.unpersist()
 

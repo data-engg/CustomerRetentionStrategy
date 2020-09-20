@@ -21,18 +21,18 @@ object LandingToFactSurveys {
     val spark = Utilities.createSparkSession("Daily survey landing to main processing")
 
     //Getting last processed time stamp of surveys_daily
-    var lastProcessedTS = Utilities.getLastModified(spark, "surveys_daily")
+    var lastProcessedTS = Utilities.getLastModified(spark, "edureka_735821_futurecart_surveys_daily")
 
     // Reading data from cassandra tables
-    val df_daily =  Utilities.readCassndraTables(spark, "surveys_daily")
+    val df_daily =  Utilities.readCassndraTables(spark, "edureka_735821_futurecart_surveys_daily")
       .filter( col("row_insertion_dttm") > lastProcessedTS)
       .persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
 
     //Getting last processed time stamp of surveys_realtime
-    lastProcessedTS = Utilities.getLastModified(spark, "surveys_realtime")
+    lastProcessedTS = Utilities.getLastModified(spark, "edureka_735821_futurecart_surveys_realtime")
 
     // Reading data from cassandra tables
-    val df_realtime =  Utilities.readCassndraTables(spark, "surveys_realtime")
+    val df_realtime =  Utilities.readCassndraTables(spark, "edureka_735821_futurecart_surveys_realtime")
       .filter( col("row_insertion_dttm") > lastProcessedTS)
       .persist(org.apache.spark.storage.StorageLevel.MEMORY_AND_DISK)
 
@@ -83,7 +83,7 @@ object LandingToFactSurveys {
 
     ts_update_df_daily.write
       .mode(org.apache.spark.sql.SaveMode.Overwrite)
-      .jdbc(Utilities.getURL, "SURVEYS_DAILY_LAST_MODIFIED", Utilities.getDbProps())
+      .jdbc(Utilities.getURL, "EDUREKA_735821_FUTURECART_SURVEYS_DAILY_LAST_MODIFIED", Utilities.getDbProps())
 
     df_daily.unpersist()
 
@@ -93,7 +93,7 @@ object LandingToFactSurveys {
 
     ts_update_df_realtime.write
       .mode(org.apache.spark.sql.SaveMode.Overwrite)
-      .jdbc(Utilities.getURL, "SURVEYS_DAILY_LAST_MODIFIED", Utilities.getDbProps())
+      .jdbc(Utilities.getURL, "EDUREKA_735821_FUTURECART_SURVEYS_REALTIME_LAST_MODIFIED", Utilities.getDbProps())
 
     ts_update_df_realtime.unpersist()
 

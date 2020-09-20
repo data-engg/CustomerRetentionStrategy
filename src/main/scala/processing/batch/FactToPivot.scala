@@ -1,3 +1,10 @@
+/*
+ This app loads data incrementally by joining facts and dimensions and loading it to pivot tables in hive
+ Usage guidelines:
+ spark2-submit --class processing.batch.FactToPivot \
+ --packages mysql:mysql-connector-java:5.1.49
+ target/scala-2.11/customer-retention-strategy_2.11-0.1.jar crm_pivot
+ */
 package processing.batch
 
 import org.apache.spark.sql.functions.{col,to_date}
@@ -22,22 +29,22 @@ object FactToPivot {
       .filter( col("row_insertion_dttm") > lastProcessedTS)
     fact_case.createOrReplaceTempView("fact_case")
 
-    val dim_product = Utilities.readDB(spark, "DIM_PRODUCT")
+    val dim_product = Utilities.readDB(spark, "EDUREKA_735821_FUTURECART_PRODUCT_DETAILS")
     dim_product.createOrReplaceTempView("dim_product")
 
-    val dim_case_country = Utilities.readDB(spark, "DIM_CASE_COUNTRY")
+    val dim_case_country = Utilities.readDB(spark, "EDUREKA_735821_FUTURECART_CASE_COUNTRY_DETAILS")
     dim_case_country.createOrReplaceTempView("dim_case_country")
 
-    val dim_case_category = Utilities.readDB(spark, "DIM_CASE_CATEGORY")
+    val dim_case_category = Utilities.readDB(spark, "EDUREKA_735821_FUTURECART_CASE_CATEGORY_DETAILS")
     dim_case_category.createOrReplaceTempView("dim_case_category")
 
-    val dim_case_priority = Utilities.readDB(spark, "DIM_CASE_PRIORITY")
+    val dim_case_priority = Utilities.readDB(spark, "EDUREKA_735821_FUTURECART_CASE_PRIORITY_DETAILS")
     dim_case_priority.createOrReplaceTempView("dim_case_priority")
 
-    val dim_call_center = Utilities.readDB(spark, "DIM_CALL_CENTER")
+    val dim_call_center = Utilities.readDB(spark, "EDUREKA_735821_FUTURECART_CALL_CENTER_DETAILS")
     dim_call_center.createOrReplaceTempView("dim_call_center")
 
-    val dim_employee = Utilities.readDB(spark, "DIM_EMPLOYEE")
+    val dim_employee = Utilities.readDB(spark, "EDUREKA_735821_FUTURECART_EMPLOYEE_DETAILS")
     dim_employee.createOrReplaceTempView("dim_employee")
 
     val fact_survey = Utilities.readDB(spark, "FACT_SURVEY")
