@@ -1,3 +1,6 @@
+-- select keyspace
+USE edureka_735821;
+
 -- Table to capture realtime kpis
 create table if not exists edureka_735821_crm_kpi_realtime(
 case_status set<text>,
