@@ -76,7 +76,7 @@ object Calendar {
   }
   /*Function to load data from to RDBMS.
     This makes it possible to load to default table as well as change target table just by adding an argument at run time*/
-  def loadData( df : DataFrame, tableName : String = "EDUREKA_735821_FUTURECART_CALENDAR_DETAILS_LAST_MODIFIED") = {
+  def loadData( df : DataFrame, tableName : String = "EDUREKA_735821_FUTURECART_CALENDAR_DETAILS") = {
     Utilities.loadDB(df, tableName)
   }
 
