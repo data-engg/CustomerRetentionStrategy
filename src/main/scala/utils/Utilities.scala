@@ -28,7 +28,6 @@ object Utilities {
     spark
   }
 
-
   def createSparkSessionWitHiveSupport(appName : String): SparkSession = {
 
     val spark = SparkSession.builder()
@@ -96,7 +95,7 @@ object Utilities {
 
   def updateLastModifiedT2 (baseTable : String, targetTable : String): Unit = {
 
-    val query : String = "{CALL UPDATE_LAST_MODIFIED_DATE_T2(?)}"
+    val query : String = "{CALL UPDATE_LAST_MODIFIED_DATE_T2(?, ?)}"
     val stmt : CallableStatement = MySql.getConn().prepareCall(query)
 
     //Setting parameter
