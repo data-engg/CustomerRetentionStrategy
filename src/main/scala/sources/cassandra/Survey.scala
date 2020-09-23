@@ -61,7 +61,7 @@ object Survey {
     Utilities.loadCassandra(survey_df, "edureka_735821_futurecart_surveys_daily")
 
     //Updating last modified
-    Utilities.updateLastModifiedCassandra(survey_df.select("row_insertion_dttm"), "edureka_735821_futurecart_surveys_daily")
+    //Utilities.updateLastModifiedCassandra(survey_df.select("row_insertion_dttm"), "edureka_735821_futurecart_surveys_daily")
 
     survey_df.unpersist()
   }

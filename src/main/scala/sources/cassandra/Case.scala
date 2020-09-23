@@ -62,7 +62,7 @@ object Case {
     Utilities.loadCassandra(case_df, "edureka_735821_futurecart_case_daily")
 
     //Updating last modified
-    Utilities.updateLastModifiedCassandra(case_df.select("row_insertion_dttm"), "edureka_735821_futurecart_case_daily")
+    //Utilities.updateLastModifiedCassandra(case_df.select("row_insertion_dttm"), "edureka_735821_futurecart_case_daily")
 
     case_df.unpersist()
   }
